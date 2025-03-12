@@ -1,6 +1,6 @@
 # telegram_notify
 
-pip install
+pip install (copy folder utils to your project)
 ```
 pip install git+https://github.com/SMART-Sense-Industrial-Design/telegram_notify.git
 ```
