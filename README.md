@@ -20,7 +20,7 @@ Or define parameters in code
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',True,10)
 ```
 <hr>
-start notify
+Start notify
 
 ```
 object.start_send_text('hello')
