@@ -1,6 +1,6 @@
 # telegram_notify
 
-Config file parameters in folder utils
+Config parameters in folder utils
 
 ```
 [telegram_notify]
