@@ -1,6 +1,5 @@
 # telegram_notify
 
-<h3>setting</h3>
 config in folder utils
 
 ```
