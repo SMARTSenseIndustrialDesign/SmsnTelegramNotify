@@ -9,6 +9,7 @@
     is_interval = true # true is on interval time
     notify_interval_sec = 60
 ```
+class will call parameters from config
 ```
 object = TelegramNotify()
 ```
