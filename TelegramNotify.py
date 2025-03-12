@@ -165,7 +165,8 @@ class TelegramNotify:
 # x = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
 # x= TelegramNotify()
 # while True:
-#     x.start_send_text('hello')
-# x.send_tg_notify_image('test',cv2.imread('test.jpg'))
-# x.start_line_notify_text('hello')
-# x.start_line_notify_image('test',cv2.imread('test.jpg'))
+    # x.start_send_text('hello')
+# x.start_send_text('hello')
+# x.start_send_image('test',cv2.imread('test.jpg'))
+# x.start_send_file('test', 'test.jpg')
+# x.start_send_video('test', 'test.mp4')

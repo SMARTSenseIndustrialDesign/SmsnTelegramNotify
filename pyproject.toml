@@ -1,0 +1,15 @@
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "smsn_telegram_notify"
+version = "0.1.0"
+authors = [
+  { name="smsn", email="nisit@smartsensedesign.com" }
+]
+description = "telegram notify"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.6"
+dependencies = ["toml","cv2"]
