@@ -24,7 +24,7 @@ start notify
 
 ```
 object.start_send_text('hello')
-object.start_send_image('test',cv2.imread('test.jpg'))
+object.start_send_image('test',cv2.imread('test.jpg') or frame)
 object.start_send_file('test', 'test.jpg')
 object.start_send_video('test', 'test.mp4')
 ```
