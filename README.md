@@ -1,8 +1,6 @@
 # telegram_notify
 
-recommend: git clone 
-
-pip install (hard for config file)
+pip install (hard for config file) -> recommend: git clone and copy folder smsn_telegram_notify to use
 ```
 pip install git+https://github.com/SMART-Sense-Industrial-Design/telegram_notify.git
 ```
