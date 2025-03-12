@@ -15,4 +15,8 @@
 
 ```
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
+object.start_send_text('hello')
+object.start_send_image('test',cv2.imread('test.jpg'))
+object.start_send_file('test', 'test.jpg')
+object.start_send_video('test', 'test.mp4')
 ```
