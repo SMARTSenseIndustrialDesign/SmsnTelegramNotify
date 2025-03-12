@@ -11,14 +11,14 @@ Config parameters in folder utils
 ```
 
 ```
-from TelegramNotify import TelegramNotify
+from smsn_telegram_notify.TelegramNotify import TelegramNotify
 object = TelegramNotify()
 ```
 
 Or define parameters in code
 
 ```
-from TelegramNotify import TelegramNotify
+from smsn_telegram_notify.TelegramNotify import TelegramNotify
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',True,10)
 ```
 
