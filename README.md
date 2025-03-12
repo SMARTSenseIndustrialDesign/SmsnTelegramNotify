@@ -1,6 +1,6 @@
 # telegram_notify
 
-options 1) config in folder utils
+- config in folder utils
 
 ```
 [telegram_notify]
@@ -14,7 +14,7 @@ options 1) config in folder utils
 object = TelegramNotify()
 ```
 
-options 2) define in code
+- define in code
 
 ```
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
