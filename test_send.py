@@ -7,5 +7,5 @@ if __name__ == "__main__":
     
     msg = "Hello, World"
     
-    tele_noti.start_telegram_notify(msg)
+    tele_noti.start_send_text(msg)
 
