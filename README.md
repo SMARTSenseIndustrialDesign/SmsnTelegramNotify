@@ -1,7 +1,7 @@
 # telegram_notify
 
 <h3>setting</h3>
-- config in folder utils
+config in folder utils
 
 ```
 [telegram_notify]
@@ -14,12 +14,13 @@
 object = TelegramNotify()
 ```
 
-- define in code
+define in code
 
 ```
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
 ```
-- start notify
+<br>
+start notify
 
 ```
 object.start_send_text('hello')
