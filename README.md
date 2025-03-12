@@ -1,5 +1,10 @@
 # telegram_notify
 
+pip install
+```
+pip install git+https://github.com/SMART-Sense-Industrial-Design/telegram_notify.git
+```
+
 Config parameters in folder utils
 
 ```
