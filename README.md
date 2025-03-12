@@ -11,7 +11,7 @@
     notify_interval_sec = 60
 ```
 
-define in code
+- define in code
 
 ```
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
