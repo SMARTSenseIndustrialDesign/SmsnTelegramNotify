@@ -11,12 +11,14 @@ Config parameters in folder utils
 ```
 
 ```
+from TelegramNotify import TelegramNotify
 object = TelegramNotify()
 ```
 
 Or define parameters in code
 
 ```
+from TelegramNotify import TelegramNotify
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',True,10)
 ```
 
@@ -27,7 +29,7 @@ define in config file:
     is_interval = false 
 
 define in code:
-    TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',is_interval=False)
+    object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',is_interval=False)
 ```
 
 
