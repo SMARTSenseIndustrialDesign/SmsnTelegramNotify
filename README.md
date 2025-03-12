@@ -4,8 +4,8 @@ Config parameters in folder utils
 
 ```
 [telegram_notify]
-    token = "7635928850:AAHEK1R9na9MRbw1vJHuXyyHcXmN00Nzx-M"
-    chat_id = "-4774966242"  # Replace with your actual group chat ID
+    token = "7635928850:AAHEK1R9na9MRbw1vJHuXyyHcXmNxxxx"
+    chat_id = "-477496xxxx"  # Replace with your actual group chat ID
     is_interval = true # true is on interval time
     notify_interval_sec = 60
 ```
@@ -17,7 +17,7 @@ object = TelegramNotify()
 Or define parameters in code
 
 ```
-object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
+object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',True,10)
 ```
 <hr>
 start notify
