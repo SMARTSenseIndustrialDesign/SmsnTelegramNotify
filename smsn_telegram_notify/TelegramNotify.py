@@ -8,6 +8,9 @@ import toml
 import os
 import logging
 from logging.handlers import TimedRotatingFileHandler
+from pathlib import Path
+
+ROOT_PROJECT = Path(__file__).resolve().parent.parent
 
 class TelegramNotify:
 
@@ -17,6 +20,7 @@ class TelegramNotify:
         """
         Telegram Notification Class
         """
+        
         cfg_telegram = self.load_toml_config()['telegram_notify']
         self.START_TIME = None
         self.TG_TOKEN = token if token else cfg_telegram['token']
@@ -26,22 +30,23 @@ class TelegramNotify:
         self.SESSION = TelegramNotify.shared_session
         
         # Logging setup with retention of 7 days
-        log_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "logs")
-        os.makedirs(log_dir, exist_ok=True)
-        log_file = os.path.join(log_dir, "telegram_notify.log")
+        log_dir = ROOT_PROJECT / "logs"
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        log_file = log_dir / "telegram_notify.log"
         handler = TimedRotatingFileHandler(log_file, when="midnight", interval=1, backupCount=7, encoding='utf-8')
         handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
-        logger = logging.getLogger()
+        logger = logging.getLogger(__name__)
         logger.setLevel(logging.ERROR)
         logger.addHandler(handler)
 
     def load_toml_config(self):
 
-        base_dir = os.path.dirname(os.path.abspath(__file__))  # หา path ของ script นี้
-        path_file = os.path.join(base_dir, "utils", "config_telegram.toml")
+        path_file = ROOT_PROJECT / "utils" / "config_telegram.toml"
+
         lock = threading.Lock()
         with lock:
-            with open(path_file, 'r') as f:
+            with open(path_file, 'r', encoding="utf-8") as f:
                 cfg = toml.load(f)
         return cfg
 
