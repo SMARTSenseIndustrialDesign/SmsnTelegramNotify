@@ -23,7 +23,11 @@ object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxx
 For no interval time
 
 ```
-define in config file:<br> is_interval = false <br>OR<br> define in code:<br> TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',is_interval=False)
+define in config file:
+    is_interval = false 
+
+define in code:
+    TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',is_interval=False)
 ```
 
 
