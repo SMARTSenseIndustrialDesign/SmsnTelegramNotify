@@ -1,0 +1,96 @@
+import time
+import requests
+import threading
+import toml
+from datetime import datetime
+import cv2
+import os
+
+class TelegramNotify:
+    
+    shared_session = requests.Session()
+
+    def __init__(self):
+        cfg_telegram = self.load_toml_config()['telegram_notify']
+        self.START_TIME = datetime.fromtimestamp(time.time())
+        self.TELEGRAM_API = "https://api.telegram.org/bot{}/".format(cfg_telegram['token'])
+        self.CHAT_ID = cfg_telegram['chat_id']
+        self.NOTIFY_INTERVAL = cfg_telegram['notify_interval_sec']
+        self.SEND_SUCCESS = False
+        self.FIRST_SEND = False
+        self.session = TelegramNotify.shared_session
+
+    def load_toml_config(self):
+
+        base_dir = os.path.dirname(os.path.abspath(__file__))  # หา path ของ script นี้
+        path_file = os.path.join(base_dir, "utils", "config_telegram.toml")
+        lock = threading.Lock()
+        with lock:
+            with open(path_file, 'r') as f:
+                cfg = toml.load(f)
+        return cfg
+
+    def send_telegram_text(self, msg):
+        self.SEND_SUCCESS = False
+        self.START_TIME = datetime.fromtimestamp(time.time())
+        url = f"{self.TELEGRAM_API}sendMessage"
+        data = {"chat_id": self.CHAT_ID, "text": msg}
+        
+        session_post = self.session.post(url, json=data)
+
+        if session_post.status_code == 200:
+            self.SEND_SUCCESS = True
+
+    def tg_send_file(self, msg, path_file):
+
+        url = "https://api.telegram.org/bot" + self.TG_TOKEN +"/sendDocument"
+        with open(path_file, 'rb') as myfile:
+            file = {'document': myfile}
+            data = {'chat_id': self.CHAT_ID, 'caption': msg}
+            session_post = self.session.post(url, files=file, data=data)
+
+    def tg_send_video(self, msg, path_file):
+
+        url = "https://api.telegram.org/bot" + self.TG_TOKEN +"/sendVideo"
+        with open(path_file, 'rb') as myfile:
+            file = {'video': myfile}
+            data = {'chat_id': self.CHAT_ID, 'caption': msg}
+            session_post = self.session.post(url, files=file, data=data)
+
+
+    def start_telegram_notify(self, dictData):
+        current_time = datetime.fromtimestamp(time.time())
+
+        if not self.FIRST_SEND:
+            self.FIRST_SEND = True
+            msg_alert = "{}, {}".format(datetime.now().strftime("%H:%M:%S"), dictData)
+            threading.Thread(target=self.send_telegram_text, args=(msg_alert,)).start()
+        elif int((current_time - self.START_TIME).total_seconds()) > self.NOTIFY_INTERVAL:
+            msg_alert = "{}, {}".format(datetime.now().strftime("%H:%M:%S"), dictData)
+            threading.Thread(target=self.send_telegram_text, args=(msg_alert,)).start()
+
+    def send_telegram_image(self, msg, image):
+        self.START_TIME = datetime.fromtimestamp(time.time())
+        url = f"{self.TELEGRAM_API}sendPhoto"
+        
+        try:
+            ret, img_buf_arr = cv2.imencode(".jpg", image)
+            if ret:
+                image_bytes = img_buf_arr.tobytes()
+                files = {'photo': ('image.jpg', image_bytes, 'image/jpeg')}
+                data = {'chat_id': self.CHAT_ID, 'caption': msg}
+                
+                session_post = self.session.post(url, files=files, data=data)
+        except Exception:
+            pass
+
+    def start_telegram_notify_image(self, dictData, image):
+        current_time = datetime.fromtimestamp(time.time())
+
+        if not self.FIRST_SEND:
+            msg_alert = f"{dictData}"
+            self.START_TIME = datetime.fromtimestamp(time.time())
+            threading.Thread(target=self.send_telegram_image, args=(msg_alert, image,)).start()
+        elif int((current_time - self.START_TIME).total_seconds()) > self.NOTIFY_INTERVAL:
+            msg_alert = f"{dictData}"
+            threading.Thread(target=self.send_telegram_image, args=(msg_alert, image,)).start()
