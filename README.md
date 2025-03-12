@@ -19,7 +19,7 @@ define in code
 ```
 object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY','-4569649679',True,10)
 ```
-<br>
+<hr>
 start notify
 
 ```
