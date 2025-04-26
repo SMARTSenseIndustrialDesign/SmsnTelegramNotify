@@ -109,10 +109,11 @@ class TelegramNotify:
 
     # --- start_send ---  
     def start_send_text(self, msg, time_interval_sec=None):
-        self._start_send(self.tg_send_text, msg, time_interval_sec)
+        self._start_send(self.tg_send_text, msg, time_interval_sec=time_interval_sec)
 
     def start_send_image_bytes(self, msg, image_bytes, time_interval_sec=None):
-        self._start_send(self.tg_send_image_bytes, msg, image_bytes, time_interval_sec)
+        self._start_send(self.tg_send_image_bytes, msg, image_bytes, time_interval_sec=time_interval_sec)
+
 
     def start_send_file(self, msg, path_file, time_interval_sec=None):
         self._start_send(self.tg_send_file, msg, path_file, time_interval_sec)
@@ -129,6 +130,7 @@ class TelegramNotify:
         if not HAS_CV2:
             raise ImportError("cv2 not installed. Cannot start send frame as file.")
         self._start_send(self.tg_frame_send_file, msg, frame, time_interval_sec)
+
 
     def _start_send(self, func, *args, time_interval_sec=None):
         interval = time_interval_sec if time_interval_sec is not None else self.TG_TIME_INTERVAL
