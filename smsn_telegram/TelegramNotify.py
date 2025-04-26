@@ -1,4 +1,3 @@
-import time
 import requests
 import threading
 from datetime import datetime
@@ -12,20 +11,22 @@ try:
 except ImportError:
     HAS_CV2 = False
 
-ROOT_PROJECT = Path(__file__).resolve().parent.parent
-
 class TelegramNotify:
 
     shared_session = requests.Session()
 
-    def __init__(self, token=None, chat_id=None):
+    def __init__(self, token=None, chat_id=None, config_path=None):
         self.START_TIME = None
         self.TG_TIME_INTERVAL = 1  # Default 1 second
         self.session = TelegramNotify.shared_session
 
-        # 🔥 Load config ถ้าไม่ได้ส่ง token, chat_id
+        # โหลด config path ถ้ายังไม่ได้กำหนด
+        if config_path is None:
+            config_path = self.get_default_config_path()
+
+        # 🔥 Load config ถ้าไม่มี token หรือ chat_id
         if not token or not chat_id:
-            cfg = self.load_toml_config()['telegram_notify']
+            cfg = self.load_toml_config(config_path)['telegram_notify']
             self.TG_TOKEN = token if token else cfg['token']
             self.CHAT_ID = chat_id if chat_id else cfg['chat_id']
             self.TG_TIME_INTERVAL = cfg.get('notify_interval_sec', 1)
@@ -33,8 +34,12 @@ class TelegramNotify:
             self.TG_TOKEN = token
             self.CHAT_ID = chat_id
 
-    def load_toml_config(self):
-        path_file = ROOT_PROJECT / "utils" / "config_telegram.toml"
+    def get_default_config_path(self):
+        root_project = Path(__file__).resolve().parent.parent
+        default_path_file = root_project / "utils" / "config_telegram.toml"
+        return default_path_file
+
+    def load_toml_config(self, path_file):
         with open(path_file, 'r', encoding="utf-8") as f:
             cfg = toml.load(f)
         return cfg
