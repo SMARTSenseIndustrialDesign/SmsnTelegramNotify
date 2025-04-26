@@ -7,7 +7,6 @@ Config parameters in folder utils
 [telegram_notify]
     token = "7635928850:AAHEK1R9na9MRbw1vJHuXyyHcXmNxxxx"
     chat_id = "-477496xxxx"  # Replace with your actual group chat ID
-    is_interval = true # on/off interval time (True is on)
     notify_interval_sec = 60
 ```
 
@@ -26,9 +25,6 @@ object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxx
 For no interval time
 
 ```
-define in config file:
-    is_interval = false 
-
 define in code:
     object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',is_interval=False)
 ```
