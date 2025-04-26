@@ -1,7 +1,10 @@
 
 import time
 import requests
-import cv2
+try:
+    import cv2
+except ImportError:
+    print("cv2 not found, please install opencv-python")
 from datetime import datetime
 import threading
 import toml
@@ -53,8 +56,20 @@ class TelegramNotify:
         if session_post.status_code != 200:
             logging.error(f"Failed to send text: {msg}. Status code: {session_post.status_code}, Response: {session_post.text}")
 
+    def tg_send_image(self, msg, image_bytes):
+        
+        url = "https://api.telegram.org/bot" + self.TG_TOKEN +"/sendPhoto"
+        try:
+            img = {'photo': image_bytes}
+            data = {'chat_id': self.CHAT_ID, 'caption': msg}
+            session_post = self.SESSION.post(url, files=img, data=data)
+            if session_post.status_code != 200:
+                logging.error(f"Failed to send image. Status code: {session_post.status_code}, Response: {session_post.text}")
 
-    def tg_send_image(self, msg, image):
+        except Exception:
+            pass
+
+    def tg_send_image_frame(self, msg, frame):
         
         url = "https://api.telegram.org/bot" + self.TG_TOKEN +"/sendPhoto"
         try:
