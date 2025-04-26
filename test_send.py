@@ -1,4 +1,4 @@
-from smsn_telegram_notify.TelegramNotify import TelegramNotify
+from TelegramNotify import TelegramNotify
 
 if __name__ == "__main__":
     
@@ -7,3 +7,4 @@ if __name__ == "__main__":
     msg = "Hello, World"
     
     tele_noti.start_send_text(msg)
+

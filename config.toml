@@ -1,0 +1,5 @@
+[telegram_notify]
+    token = "7635928850:AAHEK1R9na9MRbw1vJHuXyyHcXmN00Nzx-M"
+    chat_id = "-4774966242"  # Replace with your actual group chat ID
+    is_interval = true
+    notify_interval_sec = 60
