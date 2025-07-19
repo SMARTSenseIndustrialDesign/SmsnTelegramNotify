@@ -1,32 +1,32 @@
 # telegram_notify
 
 
-Config parameters in folder utils
+Config parameters in the repository root
 
 ```
 [telegram_notify]
-    token = "7635928850:AAHEK1R9na9MRbw1vJHuXyyHcXmNxxxx"
-    chat_id = "-477496xxxx"  # Replace with your actual group chat ID
+    token = "YOUR_TOKEN_HERE"
+    chat_id = "YOUR_CHAT_ID"  # Replace with your actual group chat ID
     notify_interval_sec = 60
 ```
 
 ```
-from smsn_telegram_notify.TelegramNotify import TelegramNotify
+from smsn_telegram.TelegramNotify import TelegramNotify
 object = TelegramNotify()
 ```
 
 Or define parameters in code
 
 ```
-from smsn_telegram_notify.TelegramNotify import TelegramNotify
-object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',True,10)
+from smsn_telegram.TelegramNotify import TelegramNotify
+object = TelegramNotify('YOUR_TOKEN','YOUR_CHAT_ID',True,10)
 ```
 
 For no interval time
 
 ```
 define in code:
-    object = TelegramNotify('7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--xxxx','-456964xxxx',is_interval=False)
+    object = TelegramNotify('YOUR_TOKEN','YOUR_CHAT_ID',is_interval=False)
 ```
 
 

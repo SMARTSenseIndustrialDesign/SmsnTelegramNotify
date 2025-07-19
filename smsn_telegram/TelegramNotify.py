@@ -1,3 +1,4 @@
+import logging
 import requests
 import threading
 from datetime import datetime
@@ -35,9 +36,9 @@ class TelegramNotify:
             self.CHAT_ID = chat_id
 
     def get_default_config_path(self):
+        """Return the default configuration file path."""
         root_project = Path(__file__).resolve().parent.parent
-        default_path_file = root_project / "utils" / "config_telegram.toml"
-        return default_path_file
+        return root_project / "config.toml"
 
     def load_toml_config(self, path_file):
         with open(path_file, 'r', encoding="utf-8") as f:
@@ -55,8 +56,8 @@ class TelegramNotify:
             img = {'photo': image_bytes}
             data = {'chat_id': self.CHAT_ID, 'caption': msg}
             self.session.post(url, files=img, data=data)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.exception("Failed to send image bytes: %s", e)
 
     def tg_send_file(self, msg, path_file):
         try:
@@ -65,8 +66,8 @@ class TelegramNotify:
                 files = {'document': myfile}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
                 self.session.post(url, files=files, data=data)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.exception("Failed to send file: %s", e)
 
     def tg_send_video(self, msg, path_file):
         try:
@@ -75,8 +76,8 @@ class TelegramNotify:
                 files = {'video': myfile}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
                 self.session.post(url, files=files, data=data)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.exception("Failed to send video: %s", e)
 
     def tg_send_frame_image(self, msg, frame):
         if not HAS_CV2:
@@ -88,8 +89,8 @@ class TelegramNotify:
                 img = {'photo': img_buf_arr.tobytes()}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
                 self.session.post(f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto", files=img, data=data)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.exception("Failed to send frame image: %s", e)
 
     def tg_frame_send_file(self, msg, frame):
         if not HAS_CV2:
@@ -104,8 +105,8 @@ class TelegramNotify:
                 files = {'document': ('frame.jpg', img_io, 'image/jpeg')}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
                 self.session.post(url, files=files, data=data)
-        except Exception:
-            pass
+        except Exception as e:
+            logging.exception("Failed to send frame file: %s", e)
 
     # --- start_send ---  
     def start_send_text(self, msg, time_interval_sec=None):
