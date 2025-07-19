@@ -27,3 +27,4 @@ for result in data.get('result', []):
 # Print cleaned data
 for title, chat_id in cleaned_data:
     print({"group_name": title, "chat_id": chat_id})
+

@@ -1,4 +1,9 @@
 [telegram_notify]
-    token = "7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY"
-    chat_id = "-4684802567"  # Replace with your actual group chat ID
+    # Telegram bot token
+    token = "YOUR_TOKEN_HERE"
+
+    # Group or user chat id
+    chat_id = "YOUR_CHAT_ID_HERE"
+
+    # Interval between notifications in seconds
     notify_interval_sec = 60
