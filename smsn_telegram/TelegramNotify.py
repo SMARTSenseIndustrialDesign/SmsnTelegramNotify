@@ -14,12 +14,10 @@ except ImportError:
 
 class TelegramNotify:
 
-    shared_session = requests.Session()
-
     def __init__(self, token=None, chat_id=None, config_path=None):
         self.START_TIME = None
         self.TG_TIME_INTERVAL = 1  # Default 1 second
-        self.session = TelegramNotify.shared_session
+        self.thread_local = threading.local()
 
         # โหลด config path ถ้ายังไม่ได้กำหนด
         if config_path is None:
@@ -45,17 +43,25 @@ class TelegramNotify:
             cfg = toml.load(f)
         return cfg
 
+    def _get_session(self):
+        """Return a thread-local requests session."""
+        if not hasattr(self.thread_local, "session"):
+            self.thread_local.session = requests.Session()
+        return self.thread_local.session
+
     def tg_send_text(self, msg):
         url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendMessage"
         data = {'chat_id': self.CHAT_ID, 'text': msg}
-        self.session.post(url, data=data)
+        session = self._get_session()
+        session.post(url, data=data)
 
     def tg_send_image_bytes(self, msg, image_bytes):
         url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto"
         try:
             img = {'photo': image_bytes}
             data = {'chat_id': self.CHAT_ID, 'caption': msg}
-            self.session.post(url, files=img, data=data)
+            session = self._get_session()
+            session.post(url, files=img, data=data)
         except Exception as e:
             logging.exception("Failed to send image bytes: %s", e)
 
@@ -65,7 +71,8 @@ class TelegramNotify:
                 url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
                 files = {'document': myfile}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(url, files=files, data=data)
+                session = self._get_session()
+                session.post(url, files=files, data=data)
         except Exception as e:
             logging.exception("Failed to send file: %s", e)
 
@@ -75,7 +82,8 @@ class TelegramNotify:
                 url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendVideo"
                 files = {'video': myfile}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(url, files=files, data=data)
+                session = self._get_session()
+                session.post(url, files=files, data=data)
         except Exception as e:
             logging.exception("Failed to send video: %s", e)
 
@@ -88,7 +96,8 @@ class TelegramNotify:
             if ret:
                 img = {'photo': img_buf_arr.tobytes()}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto", files=img, data=data)
+                session = self._get_session()
+                session.post(f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto", files=img, data=data)
         except Exception as e:
             logging.exception("Failed to send frame image: %s", e)
 
@@ -104,7 +113,8 @@ class TelegramNotify:
                 url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
                 files = {'document': ('frame.jpg', img_io, 'image/jpeg')}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(url, files=files, data=data)
+                session = self._get_session()
+                session.post(url, files=files, data=data)
         except Exception as e:
             logging.exception("Failed to send frame file: %s", e)
 
