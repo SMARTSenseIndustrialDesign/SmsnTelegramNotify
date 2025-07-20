@@ -16,7 +16,9 @@ class TelegramNotify:
 
     def __init__(self, token=None, chat_id=None, config_path=None):
         self.START_TIME = None
+        self.lock = threading.Lock()
         self.TG_TIME_INTERVAL = 1  # Default 1 second
+        self.last_send_time = None
         self.thread_local = threading.local()
 
         # โหลด config path ถ้ายังไม่ได้กำหนด
@@ -145,8 +147,13 @@ class TelegramNotify:
 
     def _start_send(self, func, *args, time_interval_sec=None):
         interval = time_interval_sec if time_interval_sec is not None else self.TG_TIME_INTERVAL
-        current_time = datetime.now()
-
-        if not self.START_TIME or (current_time - self.START_TIME).total_seconds() > interval:
-            self.START_TIME = current_time
+        if self._should_send(interval):
             threading.Thread(target=func, args=args).start()
+
+    def _should_send(self, interval):
+        current_time = datetime.now()
+        with self.lock:
+            if not self.last_send_time or (current_time - self.last_send_time).total_seconds() > interval:
+                self.last_send_time = current_time
+                return True
+        return False
