@@ -1,6 +1,8 @@
 import logging
+import queue
 import requests
 import threading
+import time
 from datetime import datetime
 from io import BytesIO
 import toml
@@ -18,6 +20,9 @@ class TelegramNotify:
         self.START_TIME = None
         self.TG_TIME_INTERVAL = 1  # Default 1 second
         self.thread_local = threading.local()
+        self._queue = queue.Queue(maxsize=100)
+        self._worker = threading.Thread(target=self._process_queue, daemon=True)
+        self._worker.start()
 
         # โหลด config path ถ้ายังไม่ได้กำหนด
         if config_path is None:
@@ -145,8 +150,23 @@ class TelegramNotify:
 
     def _start_send(self, func, *args, time_interval_sec=None):
         interval = time_interval_sec if time_interval_sec is not None else self.TG_TIME_INTERVAL
-        current_time = datetime.now()
+        if self._queue.full():
+            logging.warning("Message queue is full, waiting for available slot")
+        self._queue.put((func, args, interval))
 
-        if not self.START_TIME or (current_time - self.START_TIME).total_seconds() > interval:
-            self.START_TIME = current_time
-            threading.Thread(target=func, args=args).start()
+    def _process_queue(self):
+        while True:
+            func, args, interval = self._queue.get()
+            now = datetime.now()
+            if self.START_TIME is None:
+                self.START_TIME = now
+            else:
+                diff = (now - self.START_TIME).total_seconds()
+                if diff < interval:
+                    time.sleep(interval - diff)
+            try:
+                func(*args)
+            except Exception as e:
+                logging.exception("Failed to process queued message: %s", e)
+            self.START_TIME = datetime.now()
+            self._queue.task_done()
