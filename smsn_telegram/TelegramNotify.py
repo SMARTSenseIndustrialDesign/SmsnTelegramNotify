@@ -4,6 +4,7 @@ from datetime import datetime
 import queue
 import os
 from requests.adapters import HTTPAdapter, Retry
+import time
 
 try:
     import cv2
