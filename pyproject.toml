@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "smsn-telegram-notify"
-version = "0.1.0"
+version = "0.1.1"
 description = "Simple helper for sending Telegram notifications"
 readme = "README.md"
 authors = [{name = "Unknown"}]
