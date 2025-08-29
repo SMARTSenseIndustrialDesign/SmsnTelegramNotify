@@ -35,12 +35,12 @@ class TelegramNotify:
             Destination chat ID.
         config_path: str | None
             Optional path to a TOML config file containing
-            ``telegram_notify.token`` and ``telegram_notify.chat_id``.
+            ``smsn_telegram_notify.token`` and ``smsn_telegram_notify.chat_id``.
         """
 
         if config_path:
             with open(config_path, "rb") as f:
-                config = tomllib.load(f).get("telegram_notify", {})
+                config = tomllib.load(f).get("smsn_telegram_notify", {})
             token = token or config.get("token")
             chat_id = chat_id or config.get("chat_id")
             self.TG_TIME_INTERVAL = config.get("notify_interval_sec", 5)

@@ -1,4 +1,4 @@
-# telegram_notify
+# smsn_telegram_notify
 
 ไลบรารี Python สำหรับส่งข้อความ รูปภาพ ไฟล์ หรือวิดีโอไปยัง Telegram ได้อย่างรวดเร็ว
 
@@ -7,7 +7,7 @@
 ติดตั้งจาก PyPI:
 
 ```bash
-pip install telegram-notify
+pip install smsn-telegram-notify
 ```
 
 ติดตั้งจากซอร์สโค้ดในเครื่อง:
@@ -19,7 +19,7 @@ pip install .
 ## เริ่มต้นใช้งาน
 
 ```python
-from telegram_notify import TelegramNotify
+from smsn_telegram_notify import TelegramNotify
 
 # อ่านค่าจากไฟล์ config.toml
 notifier = TelegramNotify(config_path="config.toml")
@@ -31,7 +31,7 @@ notifier = TelegramNotify(token="YOUR_TOKEN", chat_id="CHAT_ID")
 ตัวอย่างสคริปต์แบบง่ายในการส่งข้อความหนึ่งครั้ง:
 
 ```python
-from telegram_notify import TelegramNotify
+from smsn_telegram_notify import TelegramNotify
 import time
 
 if __name__ == "__main__":
@@ -43,7 +43,7 @@ if __name__ == "__main__":
 ตัวอย่างไฟล์ `config.toml`:
 
 ```toml
-[telegram_notify]
+[smsn_telegram_notify]
 token = "123456:ABCDEFG"
 chat_id = "-100123456"
 notify_interval_sec = 60

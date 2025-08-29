@@ -1,4 +1,4 @@
-from telegram_notify import TelegramNotify
+from smsn_telegram_notify import TelegramNotify
 import time
 
 if __name__ == "__main__":

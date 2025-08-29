@@ -1,4 +1,4 @@
-"""Public package interface for telegram_notify."""
+"""Public package interface for smsn_telegram_notify."""
 
 from .notify import TelegramNotify
 
