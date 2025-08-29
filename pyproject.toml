@@ -1,0 +1,18 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "telegram-notify"
+version = "0.1.0"
+description = "Simple helper for sending Telegram notifications"
+readme = "README.md"
+authors = [{name = "Unknown"}]
+requires-python = ">=3.8"
+dependencies = [
+    "requests",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["telegram_notify"]
