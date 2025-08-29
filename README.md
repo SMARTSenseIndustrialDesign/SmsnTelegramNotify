@@ -1,16 +1,16 @@
 # telegram_notify
 
-Library สำหรับส่งข้อความหรือไฟล์ไปยัง Telegram ได้อย่างง่ายดาย
+ไลบรารี Python สำหรับส่งข้อความ รูปภาพ ไฟล์ หรือวิดีโอไปยัง Telegram ได้อย่างรวดเร็ว
 
 ## การติดตั้ง
 
-ติดตั้งจากโค้ดในเครื่อง:
+ติดตั้งจากซอร์สโค้ดในเครื่อง:
 
 ```bash
 pip install .
 ```
 
-## การใช้งาน
+## เริ่มต้นใช้งาน
 
 ```python
 from telegram_notify import TelegramNotify
@@ -20,26 +20,65 @@ notifier = TelegramNotify(config_path="config.toml")
 
 # หรือกำหนด token และ chat_id โดยตรง
 notifier = TelegramNotify(token="YOUR_TOKEN", chat_id="CHAT_ID")
-
-notifier.start_send_text("hello")
 ```
 
-ไฟล์ `config.toml` ตัวอย่าง:
+ตัวอย่างไฟล์ `config.toml`:
 
 ```toml
 [telegram_notify]
-  token = "123456:ABCDEFG"
-  chat_id = "-100123456"
-  notify_interval_sec = 60
+token = "123456:ABCDEFG"
+chat_id = "-100123456"
+notify_interval_sec = 60
 ```
 
-> ฟังก์ชันส่งรูปภาพและวิดีโอจำเป็นต้องติดตั้ง `opencv-python` เพิ่มเติม
+> ฟังก์ชันที่เกี่ยวข้องกับภาพหรือวิดีโอจำเป็นต้องติดตั้ง `opencv-python` เพิ่มเติม
 
-## เริ่มส่งแจ้งเตือน
+## Public Send Methods
+เมทอดทั้งหมดเป็น **non-blocking** และมีตัวเลือก `time_interval` เพื่อกำหนดช่วงเวลาขั้นต่ำระหว่างการส่ง (ค่าเริ่มต้น 5 วินาที หรือค่าจาก `notify_interval_sec`).
+
+### `start_send_text(msg, time_interval=None)`
+ส่งข้อความตัวอักษรธรรมดา
 
 ```python
-notifier.start_send_text('hello')
-notifier.start_send_image('test', cv2.imread('test.jpg'))
-notifier.start_send_file('test', 'test.jpg')
-notifier.start_send_video('test', 'test.mp4')
+notifier.start_send_text("hello")
+```
+
+### `start_send_image(msg, image, time_interval=None)`
+ส่งรูปภาพจากอ็อบเจ็กต์ภาพของ OpenCV
+
+```python
+import cv2
+img = cv2.imread("test.jpg")
+notifier.start_send_image("รูปทดสอบ", img)
+```
+
+### `start_bytes_send_file(msg, bytes_data, time_interval=None)`
+ส่งไฟล์จากข้อมูลแบบไบต์โดยตรง
+
+```python
+with open("report.pdf", "rb") as f:
+    data = f.read()
+notifier.start_bytes_send_file("ส่งจาก bytes", data)
+```
+
+### `start_frame_send_file(msg, frame, time_interval=None)`
+ส่งเฟรมภาพ (เช่น เฟรมจากกล้อง)
+
+```python
+frame = cv2.imread("frame.jpg")
+notifier.start_frame_send_file("ส่งเฟรม", frame)
+```
+
+### `start_send_file(msg, path_file, time_interval=None)`
+ส่งไฟล์จากพาธบนดิสก์
+
+```python
+notifier.start_send_file("ส่งไฟล์", "document.txt")
+```
+
+### `start_send_video(msg, path_file, time_interval=None)`
+ส่งวิดีโอจากพาธบนดิสก์
+
+```python
+notifier.start_send_video("ส่งวิดีโอ", "clip.mp4")
 ```
