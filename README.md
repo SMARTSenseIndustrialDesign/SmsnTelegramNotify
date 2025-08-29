@@ -40,7 +40,13 @@ notify_interval_sec = 60
 ส่งข้อความตัวอักษรธรรมดา
 
 ```python
+import time
 notifier.start_send_text("hello")
+time.sleep(3)          # เมทอดนี้ทำงานแบบไม่รอผล จึงควรรอให้คิวส่งเสร็จก่อนปิดโปรแกรม
+# หรือ notifier.send_queue.join()
+
+# หากต้องการส่งแบบ synchronous
+notifier.tg_send_text("hello")
 ```
 
 ### `start_send_image(msg, image, time_interval=None)`
