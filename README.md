@@ -49,6 +49,17 @@ chat_id = "-100123456"
 notify_interval_sec = 60
 ```
 
+## การหา Chat ID
+
+หากยังไม่ทราบ `chat_id` ของกลุ่ม สามารถใช้สคริปต์ `get_chat_id.py` ในโปรเจกต์ได้ดังนี้:
+
+```bash
+export TELEGRAM_BOT_TOKEN="YOUR_TOKEN"
+python get_chat_id.py
+```
+
+สคริปต์จะพิมพ์ชื่อกลุ่มและ `chat_id` ที่พบจากข้อมูล `getUpdates` ของบอท
+
 > ฟังก์ชันที่เกี่ยวข้องกับภาพหรือวิดีโอจำเป็นต้องติดตั้ง `opencv-python` เพิ่มเติม
 
 ## Public Send Methods
