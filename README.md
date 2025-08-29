@@ -82,3 +82,11 @@ notifier.start_send_file("ส่งไฟล์", "document.txt")
 ```python
 notifier.start_send_video("ส่งวิดีโอ", "clip.mp4")
 ```
+
+## การทดสอบ
+
+ใช้ `pytest` เพื่อรันชุดการทดสอบของโปรเจกต์
+
+```bash
+pytest
+```
