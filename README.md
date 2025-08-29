@@ -4,6 +4,12 @@
 
 ## การติดตั้ง
 
+ติดตั้งจาก PyPI:
+
+```bash
+pip install telegram-notify
+```
+
 ติดตั้งจากซอร์สโค้ดในเครื่อง:
 
 ```bash
