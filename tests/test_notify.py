@@ -1,11 +1,11 @@
 import pytest
-from telegram_notify import TelegramNotify
+from smsn_telegram_notify import TelegramNotify
 from unittest.mock import patch, Mock
 
 
 def test_should_send_respects_interval():
     notifier = TelegramNotify(token="t", chat_id="c")
-    with patch('telegram_notify.notify.time.time', side_effect=[10, 12, 18]):
+    with patch('smsn_telegram_notify.notify.time.time', side_effect=[10, 12, 18]):
         assert notifier._should_send('text') is True
         assert notifier._should_send('text') is False
         assert notifier._should_send('text') is True

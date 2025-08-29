@@ -1,4 +1,4 @@
-[telegram_notify]
+[smsn_telegram_notify]
 token = "YOUR_TOKEN"
 chat_id = "YOUR_CHAT_ID"
 notify_interval_sec = 60
