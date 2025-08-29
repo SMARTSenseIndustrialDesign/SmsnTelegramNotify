@@ -1,9 +1,9 @@
 import requests
 import threading
 from datetime import datetime
-from io import BytesIO
-import toml
-from pathlib import Path
+import queue
+import os
+from requests.adapters import HTTPAdapter, Retry
 
 try:
     import cv2
@@ -12,130 +12,167 @@ except ImportError:
     HAS_CV2 = False
 
 class TelegramNotify:
+    def __init__(self, token=None, chat_id=None):
+        self.TG_TOKEN = token
+        self.CHAT_ID = chat_id
+        self.TG_TIME_INTERVAL = 5  # 🕒 Global default interval (sec)
 
-    shared_session = requests.Session()
+        self.last_send_time = {
+            'text': 0,
+            'image': 0,
+            'file': 0,
+            'frame': 0,
+            'video': 0
+        }
 
-    def __init__(self, token=None, chat_id=None, config_path=None):
-        self.START_TIME = None
-        self.TG_TIME_INTERVAL = 1  # Default 1 second
-        self.session = TelegramNotify.shared_session
+        self.send_queue = queue.Queue(maxsize=100)
+        self.worker_thread = threading.Thread(target=self._process_queue, daemon=True)
+        self.worker_thread.start()
 
-        # โหลด config path ถ้ายังไม่ได้กำหนด
-        if config_path is None:
-            config_path = self.get_default_config_path()
+        # ✅ Session + Retry
+        self.session = requests.Session()
+        retries = Retry(total=3, backoff_factor=2, status_forcelist=[500, 502, 503, 504])
+        self.session.mount('https://', HTTPAdapter(max_retries=retries))
 
-        # 🔥 Load config ถ้าไม่มี token หรือ chat_id
-        if not token or not chat_id:
-            cfg = self.load_toml_config(config_path)['telegram_notify']
-            self.TG_TOKEN = token if token else cfg['token']
-            self.CHAT_ID = chat_id if chat_id else cfg['chat_id']
-            self.TG_TIME_INTERVAL = cfg.get('notify_interval_sec', 1)
-        else:
-            self.TG_TOKEN = token
-            self.CHAT_ID = chat_id
+    def _safe_telegram_post(self, url, data=None, files=None, timeout=30):
+        try:
+            response = self.session.post(url, data=data, files=files, timeout=timeout)
+            if response.status_code == 200:
+                result = response.json()
+                if result.get("ok", False):
+                    return True
+                else:
+                    print(f"❌ Telegram ตอบกลับผิดพลาด: {result}")
+            else:
+                print(f"❌ HTTP Error: {response.status_code} | {response.text}")
+        except requests.exceptions.SSLError as e:
+            print(f"❌ SSL Error: {e}")
+        except Exception as e:
+            print(f"❌ General Exception: {e}")
+        return False
 
-    def get_default_config_path(self):
-        root_project = Path(__file__).resolve().parent.parent
-        default_path_file = root_project / "utils" / "config_telegram.toml"
-        return default_path_file
+    def _process_queue(self):
+        while True:
+            try:
+                func, args = self.send_queue.get()
+                func(*args)
+                self.send_queue.task_done()
+            except Exception as e:
+                print(f"❌ Error in queue processor: {e}")
 
-    def load_toml_config(self, path_file):
-        with open(path_file, 'r', encoding="utf-8") as f:
-            cfg = toml.load(f)
-        return cfg
+    def _should_send(self, key, time_interval=None):
+        now = time.time()
+        interval = time_interval if time_interval is not None else self.TG_TIME_INTERVAL
+        if now - self.last_send_time[key] >= interval:
+            self.last_send_time[key] = now
+            return True
+        return False
 
+    # ========== Actual Send Methods ==========
     def tg_send_text(self, msg):
         url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendMessage"
         data = {'chat_id': self.CHAT_ID, 'text': msg}
-        self.session.post(url, data=data)
+        self._safe_telegram_post(url, data=data)
 
-    def tg_send_image_bytes(self, msg, image_bytes):
-        url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto"
+    def tg_send_image(self, msg, image):
         try:
-            img = {'photo': image_bytes}
-            data = {'chat_id': self.CHAT_ID, 'caption': msg}
-            self.session.post(url, files=img, data=data)
-        except Exception:
-            pass
+            ret, buffer = cv2.imencode(".jpg", image, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            if ret:
+                img_bytes = buffer.tobytes()
+                url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto"
+                files = {'photo': ('image.jpg', img_bytes, 'image/jpeg')}
+                data = {'chat_id': self.CHAT_ID, 'caption': msg}
+                self._safe_telegram_post(url, files=files, data=data)
+        except Exception as e:
+            print(f"❌ Failed to send image: {e}")
+
+    def tg_byte_send_file(self, msg, bytes_data):
+        filename = f"frame_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+        url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
+        files = {'document': (filename, bytes_data, 'image/jpeg')}
+        data = {'chat_id': self.CHAT_ID, 'caption': msg}
+        self._safe_telegram_post(url, files=files, data=data)
+
+    def tg_frame_send_file(self, msg, frame):
+        try:
+            ret, buffer = cv2.imencode(".jpg", frame, [cv2.IMWRITE_JPEG_QUALITY, 80])
+            if ret:
+                img_bytes = buffer.tobytes()
+                filename = f"frame_{datetime.now().strftime('%Y%m%d_%H%M%S')}.jpg"
+                url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
+                files = {'document': (filename, img_bytes, 'image/jpeg')}
+                data = {'chat_id': self.CHAT_ID, 'caption': msg}
+                self._safe_telegram_post(url, files=files, data=data)
+        except Exception as e:
+            print(f"❌ Failed to send frame: {e}")
 
     def tg_send_file(self, msg, path_file):
         try:
+            if not os.path.exists(path_file):
+                print(f"❌ File not found: {path_file}")
+                return
+            filename = os.path.basename(path_file)
+            url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
             with open(path_file, 'rb') as myfile:
-                url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
-                files = {'document': myfile}
+                files = {'document': (filename, myfile)}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(url, files=files, data=data)
-        except Exception:
-            pass
+                self._safe_telegram_post(url, files=files, data=data)
+        except Exception as e:
+            print(f"❌ Failed to send file: {e}")
 
     def tg_send_video(self, msg, path_file):
         try:
+            if not os.path.exists(path_file):
+                print(f"❌ Video file not found: {path_file}")
+                return
+            filename = os.path.basename(path_file)
+            url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendVideo"
             with open(path_file, 'rb') as myfile:
-                url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendVideo"
-                files = {'video': myfile}
+                files = {'video': (filename, myfile)}
                 data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(url, files=files, data=data)
-        except Exception:
-            pass
+                self._safe_telegram_post(url, files=files, data=data)
+        except Exception as e:
+            print(f"❌ Failed to send video: {e}")
 
-    def tg_send_frame_image(self, msg, frame):
-        if not HAS_CV2:
-            raise ImportError("cv2 not installed. Cannot send frame as image.")
+    # ========== Public Send Methods ==========
+    def start_send_text(self, msg, time_interval=None):
+        if self._should_send('text', time_interval):
+            try:
+                self.send_queue.put((self.tg_send_text, (msg,)), timeout=1)
+            except queue.Full:
+                print("⚠️ Send queue is full. Skipping text.")
 
-        try:
-            ret, img_buf_arr = cv2.imencode(".jpg", frame)
-            if ret:
-                img = {'photo': img_buf_arr.tobytes()}
-                data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(f"https://api.telegram.org/bot{self.TG_TOKEN}/sendPhoto", files=img, data=data)
-        except Exception:
-            pass
+    def start_send_image(self, msg, image, time_interval=None):
+        if self._should_send('image', time_interval):
+            try:
+                self.send_queue.put((self.tg_send_image, (msg, image)), timeout=1)
+            except queue.Full:
+                print("⚠️ Send queue is full. Skipping image.")
 
-    def tg_frame_send_file(self, msg, frame):
-        if not HAS_CV2:
-            raise ImportError("cv2 not installed. Cannot send frame as file.")
+    def start_bytes_send_file(self, msg, bytes_data, time_interval=None):
+        if self._should_send('file', time_interval):
+            try:
+                self.send_queue.put((self.tg_byte_send_file, (msg, bytes_data)), timeout=1)
+            except queue.Full:
+                print("⚠️ Send queue is full. Skipping byte file.")
 
-        try:
-            ret, buffer = cv2.imencode(".jpg", frame)
-            if ret:
-                img_io = BytesIO(buffer)
-                img_io.seek(0)
-                url = f"https://api.telegram.org/bot{self.TG_TOKEN}/sendDocument"
-                files = {'document': ('frame.jpg', img_io, 'image/jpeg')}
-                data = {'chat_id': self.CHAT_ID, 'caption': msg}
-                self.session.post(url, files=files, data=data)
-        except Exception:
-            pass
+    def start_frame_send_file(self, msg, frame, time_interval=None):
+        if self._should_send('frame', time_interval):
+            try:
+                self.send_queue.put((self.tg_frame_send_file, (msg, frame)), timeout=1)
+            except queue.Full:
+                print("⚠️ Send queue is full. Skipping frame.")
 
-    # --- start_send ---  
-    def start_send_text(self, msg, time_interval_sec=None):
-        self._start_send(self.tg_send_text, msg, time_interval_sec=time_interval_sec)
+    def start_send_file(self, msg, path_file, time_interval=None):
+        if self._should_send('file', time_interval):
+            try:
+                self.send_queue.put((self.tg_send_file, (msg, path_file)), timeout=1)
+            except queue.Full:
+                print("⚠️ Send queue is full. Skipping file.")
 
-    def start_send_image_bytes(self, msg, image_bytes, time_interval_sec=None):
-        self._start_send(self.tg_send_image_bytes, msg, image_bytes, time_interval_sec=time_interval_sec)
-
-
-    def start_send_file(self, msg, path_file, time_interval_sec=None):
-        self._start_send(self.tg_send_file, msg, path_file, time_interval_sec)
-
-    def start_send_video(self, msg, path_file, time_interval_sec=None):
-        self._start_send(self.tg_send_video, msg, path_file, time_interval_sec)
-
-    def start_send_frame_image(self, msg, frame, time_interval_sec=None):
-        if not HAS_CV2:
-            raise ImportError("cv2 not installed. Cannot start send frame as image.")
-        self._start_send(self.tg_send_frame_image, msg, frame, time_interval_sec)
-
-    def start_frame_send_file(self, msg, frame, time_interval_sec=None):
-        if not HAS_CV2:
-            raise ImportError("cv2 not installed. Cannot start send frame as file.")
-        self._start_send(self.tg_frame_send_file, msg, frame, time_interval_sec)
-
-
-    def _start_send(self, func, *args, time_interval_sec=None):
-        interval = time_interval_sec if time_interval_sec is not None else self.TG_TIME_INTERVAL
-        current_time = datetime.now()
-
-        if not self.START_TIME or (current_time - self.START_TIME).total_seconds() > interval:
-            self.START_TIME = current_time
-            threading.Thread(target=func, args=args).start()
+    def start_send_video(self, msg, path_file, time_interval=None):
+        if self._should_send('video', time_interval):
+            try:
+                self.send_queue.put((self.tg_send_video, (msg, path_file)), timeout=1)
+            except queue.Full:
+                print("⚠️ Send queue is full. Skipping video.")

@@ -1,6 +1,6 @@
 import requests
 
-TOKEN = "xxx"
+TOKEN = "7568707427:AAE1eFFtPDUsjVwi1X_Q7eYLa--jHQ4hPSY"
 url = f"https://api.telegram.org/bot{TOKEN}/getUpdates"
 
 response = requests.get(url)
