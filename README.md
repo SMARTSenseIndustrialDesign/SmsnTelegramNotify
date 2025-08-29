@@ -22,6 +22,18 @@ notifier = TelegramNotify(config_path="config.toml")
 notifier = TelegramNotify(token="YOUR_TOKEN", chat_id="CHAT_ID")
 ```
 
+ตัวอย่างสคริปต์แบบง่ายในการส่งข้อความหนึ่งครั้ง:
+
+```python
+from telegram_notify import TelegramNotify
+import time
+
+if __name__ == "__main__":
+    notifier = TelegramNotify(config_path="config.toml")
+    notifier.start_send_text("Hello, World")
+    time.sleep(2)  # รอให้คิวส่งเสร็จก่อนปิดโปรแกรม
+```
+
 ตัวอย่างไฟล์ `config.toml`:
 
 ```toml
