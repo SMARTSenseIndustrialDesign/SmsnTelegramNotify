@@ -7,16 +7,43 @@ from requests.adapters import HTTPAdapter, Retry
 import time
 
 try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - fallback for Python<3.11
+    import tomli as tomllib  # type: ignore
+
+try:  # Optional dependency for image support
     import cv2
     HAS_CV2 = True
-except ImportError:
+except ImportError:  # pragma: no cover - OpenCV not installed
     HAS_CV2 = False
 
+
 class TelegramNotify:
-    def __init__(self, token=None, chat_id=None):
+    def __init__(self, token: str | None = None, chat_id: str | None = None, config_path: str | None = None):
+        """Initialize Telegram notification sender.
+
+        Parameters
+        ----------
+        token: str | None
+            Bot token from Telegram.
+        chat_id: str | None
+            Destination chat ID.
+        config_path: str | None
+            Optional path to a TOML config file containing
+            ``telegram_notify.token`` and ``telegram_notify.chat_id``.
+        """
+
+        if config_path:
+            with open(config_path, "rb") as f:
+                config = tomllib.load(f).get("telegram_notify", {})
+            token = token or config.get("token")
+            chat_id = chat_id or config.get("chat_id")
+            self.TG_TIME_INTERVAL = config.get("notify_interval_sec", 5)
+        else:
+            self.TG_TIME_INTERVAL = 5  # 🕒 Global default interval (sec)
+
         self.TG_TOKEN = token
         self.CHAT_ID = chat_id
-        self.TG_TIME_INTERVAL = 5  # 🕒 Global default interval (sec)
 
         self.last_send_time = {
             'text': 0,
